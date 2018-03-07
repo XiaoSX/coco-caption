@@ -4,6 +4,7 @@ from bleu.bleu import Bleu
 from meteor.meteor import Meteor
 from rouge.rouge import Rouge
 from cider.cider import Cider
+from wmd.wmd import WMD
 
 class COCOEvalCap:
     def __init__(self, coco, cocoRes):
@@ -26,7 +27,7 @@ class COCOEvalCap:
         # =================================================
         # Set up scorers
         # =================================================
-        print 'tokenization...'
+        print('tokenization...')
         tokenizer = PTBTokenizer()
         gts  = tokenizer.tokenize(gts)
         res = tokenizer.tokenize(res)
@@ -34,29 +35,30 @@ class COCOEvalCap:
         # =================================================
         # Set up scorers
         # =================================================
-        print 'setting up scorers...'
+        print('setting up scorers...')
         scorers = [
             (Bleu(4), ["Bleu_1", "Bleu_2", "Bleu_3", "Bleu_4"]),
             (Meteor(),"METEOR"),
             (Rouge(), "ROUGE_L"),
-            (Cider(), "CIDEr")
+            (Cider(), "CIDEr"),
+            (WMD(), "WMD")
         ]
 
         # =================================================
         # Compute scores
         # =================================================
         for scorer, method in scorers:
-            print 'computing %s score...'%(scorer.method())
+            print('computing %s score...'%(scorer.method()))
             score, scores = scorer.compute_score(gts, res)
             if type(method) == list:
                 for sc, scs, m in zip(score, scores, method):
                     self.setEval(sc, m)
                     self.setImgToEvalImgs(scs, gts.keys(), m)
-                    print "%s: %0.3f"%(m, sc)
+                    print("%s: %0.3f"%(m, sc))
             else:
                 self.setEval(score, method)
                 self.setImgToEvalImgs(scores, gts.keys(), method)
-                print "%s: %0.3f"%(method, score)
+                print("%s: %0.3f"%(method, score))
         self.setEvalImgs()
 
     def setEval(self, score, method):
